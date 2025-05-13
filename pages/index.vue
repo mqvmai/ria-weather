@@ -5,7 +5,7 @@
   <v-card-text class="bg-blue">
     <v-tabs-window v-model="tab">
       <v-tabs-window-item v-for="city in cities" :value="city.value">
-        <TabContent weather-data="weather" />
+        <TabContent :current-weather="currentWeather" :hourly-weather="hourlyWeather" />
       </v-tabs-window-item>
     </v-tabs-window>
   </v-card-text>
@@ -13,6 +13,8 @@
 
 <script setup lang="ts">
 const tab = ref(null)
+const currentWeather = ref<any>(null)
+const hourlyWeather = ref<any>(null)
 const cities = [
   { name: 'Rio De Janeiro', value: 'RIO' },
   { name: 'Beijing', value: 'BEI' },
@@ -29,6 +31,7 @@ watch(tab, async (newCity, oldCity) => {
       city: newCity
     }
   })
-  console.log(data.value)
+  currentWeather.value = data.value?.currentWeather
+  hourlyWeather.value = data.value?.hourlyWeather
 })
 </script>

@@ -1,25 +1,25 @@
 <template>
-  <v-card class="bg-white">
+  <v-card class="bg-white" v-if="hourlyWeather">
     <v-card-title>
       Next hours
     </v-card-title>
     <v-divider></v-divider>
     <v-row no-gutters>
-      <v-col v-for="day in mockWeatherHours" :key="day.time" cols="3">
+      <v-col v-for="day in hourlyWeather?.list" :key="day.dt" cols="3">
         <v-sheet class="pt-2 pb-2 text-center" border>
           <v-row no-gutters>
             <v-col cols="12" sm="4">
               <v-sheet>
-                {{ day.temp }}°
+                {{ Math.trunc(day.main.temp) }}°
               </v-sheet>
               <v-sheet class="text-blue">
-                {{ day.precip }}%
+                {{ day.main.humidity }}%
               </v-sheet>
               <v-sheet>
-                <img :src="getWeatherIcon('10d')" />
+                <img :src="getWeatherIcon(day.weather[0].icon)" />
               </v-sheet>
               <v-sheet>
-                {{ day.time }}
+                {{ formatDateForHourly(day.dt_txt) }}
               </v-sheet>
             </v-col>
           </v-row>
@@ -27,20 +27,20 @@
       </v-col>
     </v-row>
   </v-card>
-  <v-card class="mt-5 bg-white">
+  <v-card class="mt-5 bg-white" v-if="currentWeather">
     <v-card-title>
       Next 5 days
     </v-card-title>
     <v-list class="pt-0">
-      <v-list-item lines="two" :border="true" v-for="day in mockWeatherDays" :key="day.time" :subtitle="day.description"
-        :title="day.time">
+      <v-list-item lines="two" :border="true" v-for="(day, index) in Array(5).fill(currentWeather)" :key="index"
+        :subtitle="day.weather[0].description" :title="formatDateForDaily(day.dt)">
         <template v-slot:prepend>
           <v-avatar color="white">
-            <img :src="getWeatherIcon('10d')" />
+            <img :src="getWeatherIcon(day.weather[0].icon)" />
           </v-avatar>
         </template>
         <template v-slot:append>
-          {{ day.high }}° {{ day.low }}°
+          {{ Math.trunc(day.main.temp_max) }}° {{ Math.trunc(day.main.temp_min) }}°
         </template>
       </v-list-item>
     </v-list>
@@ -48,57 +48,23 @@
 </template>
 
 <script setup lang="ts">
-const mockWeatherHours = [
-  {
-    temp: '20',
-    precip: '0',
-    time: '3:00 PM'
-  },
-  {
-    temp: '23',
-    precip: '0',
-    time: '4:00 PM'
-  },
-  {
-    temp: '25',
-    precip: '0',
-    time: '5:00 PM'
-  },
-  {
-    temp: '26',
-    precip: '0',
-    time: '6:00 PM'
-  }
-]
-const mockWeatherDays = [
-  {
-    time: 'Fri, Nov 1',
-    description: 'Clear throughout the day',
-    high: '27',
-    low: '11'
-  },
-  {
-    time: 'Sat, Nov 2',
-    description: 'Clear throughout the day',
-    high: '28',
-    low: '13'
-  },
-  {
-    time: 'Sun, Nov 2',
-    description: 'Clear throughout the day',
-    high: '27',
-    low: '14'
-  },
-  {
-    time: 'Mon, Nov 3',
-    description: 'Clear throughout the day',
-    high: '26',
-    low: '11'
-  },
-]
+import moment from 'moment'
+
+defineProps({
+  currentWeather: Object,
+  hourlyWeather: Object
+})
 
 const getWeatherIcon = (id: string) => {
   return `https://openweathermap.org/img/wn/${id}.png`
+}
+
+const formatDateForHourly = (date: number) => {
+  return moment(date).format('h:mm a')
+}
+
+const formatDateForDaily = (date: number) => {
+  return moment.unix(date).format('ddd, MMM D')
 }
 </script>
 
